@@ -1,0 +1,1 @@
+Select * from dba_high_water_mark_statistics;

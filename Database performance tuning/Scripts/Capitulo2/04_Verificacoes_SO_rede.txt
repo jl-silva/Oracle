@@ -1,0 +1,25 @@
+*************************************************
+-- Ver carga de rede atraves do utilitario netstat
+*************************************************
+
+Utilizar utilitario netstat p/ mostrar nome do programa consumindo recursos e modo continuo (nao requer privilegios especiais):
+
+a) Estatisticas por interface de rede:
+   > netstat -ie
+   
+b) Ver conexoes somente do BD (filtrando pela porta 1521), incluindo nome do processo:
+   > netstat -atnp | grep "1521\|Proto"
+    
+--------------------------------------------------------
+DESCRICAO DAS PRINCIPAIS COLUNAS DE SAIDA DO NETSTAT
+--------------------------------------------------------
+Recv-Q          Dados sendo recebidos
+Send-Q		Dados sendo enviados
+
+--------------------------------------------------------
+IDENTIFICANDO PROBLEMAS
+--------------------------------------------------------
+-- Send-q alto indica gargalo de rede ao enviar dados para os clientes do BD
+
+
+-- Para mais exemplos, consulte: http://www.binarytides.com/linux-netstat-command-examples/

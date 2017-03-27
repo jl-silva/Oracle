@@ -1,0 +1,13 @@
+exec wheb_usuario_pck.set_nm_usuario('cetrentin');
+
+update tabela_sistema set ie_sincronizar_wheb = 'S' where nm_tabela IN (select NM_TABELA from INTEGRIDADE_REFERENCIAL where NM_TABELA_REFERENCIA = 'PLS_CONTA_PROC');
+
+
+
+exec wheb_usuario_pck.set_nm_usuario('cetrentin');
+update tabela_sistema set ie_sincronizar_wheb = 'S' where nm_tabela IN ('PLS_PROTOCOLO_CONTA');
+
+commit;
+
+
+

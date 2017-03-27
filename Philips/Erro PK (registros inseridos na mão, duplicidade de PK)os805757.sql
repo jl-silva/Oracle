@@ -1,0 +1,1 @@
+exec Tasy_posicionar_sequence('PLS_PRESTADOR','NR_SEQUENCIA','R');

@@ -1,0 +1,199 @@
+- Shared pool e library cache:
+    - flush na shared pool para desfragmentar (inicialmente poderá ficar + lento até carregar objetos novamente em memória)
+    - aplicações devem usar variáveis bind;
+    - nem sempre aumentar o seu tamanho irá melhorar hitratio.
+    
+- Buffer cache tuning:
+    - Evitar:
+        · 'cache buffers lru chain' latch contention
+        · Large "Average Write Queue" length
+        · Lots of time spent waiting for "write complete waits"
+        · Lots of time spent waiting for "free buffer waits"
+        
+- Redo Log Buffer Performance Tuning  
+    - The value of "redo log space requests" statistic in v$sysstat should be near 0.
+    - A recomendação é ter um log switch a cada 15 ou 30 minutos.
+    - Quando possível utilize NOLOGGING
+    
+- Tuning sem modificar a query:
+        - modifique as estatisticas
+        - add ou remove indices
+        - existem 8 ou mais tabelas no join: OPTIMIZER_MAX_PERMUTATIONS 
+        - crie views com hints
+        - crie MVs
+        - modifique parametros da instancia
+        - considere usar stored outlines
+        
+- Tuning modificando a query:
+        - add hints
+        - crie views inline
+        - add predicados mais seletivos
+        - divida o trabalho em multiplas queries
+        - reescreva com pl/sql
+
+- In this case there are mainly soft parses, however, if there were high hard parses, this may indicate high usage of literals or introduction of many new sqls. In this case consider using bind variables in place of literals.  
+If there is high percentage of soft parses, then check the application to see if it is using shareable sqls.  
+Ideally, Execute to Parse should be closer to 100%.        
+        
+References:
+    Legacy Troubleshooting Guide: Common Performance Tuning Issues (Doc ID 106285.1)    
+    
+    
+    
+Chapter 9 Resolving Performance Degradation Over Time
+http://docs.oracle.com/database/121/TDPPT/tdppt_degrade.htm#TDPPT089
+Document 1477599.1 Best Practices: Proactive Data Collection for Performance Issues
+Document 1490798.1 AWR Reporting - Licensing Requirements Clarification
+Document 1226841.1 How To: Gather Statistics for the Cost Based Optimizer
+Document 1477599.1 Best Practices: Proactive Data Collection for Performance Issues
+
+
+ASH
+
+Active Session History (ASH) reports provide very granular metric collection being as they drills down to the session level. In contrast to the aggregated view of performance data provided by AWR, ASH provides information at 1 second level accuracy for each individual database session. This is very important for intermittent performance problems or hangs.  Leveraging ASH data can sometimes be enough to diagnose a problem at the session level thus preventing the need to take additional 10046 or sql trace diagnostics. ASH reports can be obtained as needed through the Advanced Workload Repository(AWR).
+For more details about Active Session History(ASH), See:
+
+
+Baseline captures should be obtained and stored for various time periods depending upon your business profile. Suggested baseline collections would be:
+
+normal activity
+non-busy times
+the busiest time of the day
+month end or business cycle processing
+batch processing.    
+
+
+- lista de enqueues: 
+    select substr(type,1,2),substr(name,1,30),substr(description,1,40) 
+    from v$lock_type
+    
+- Para ver I/o lento: Document 301137.1 OS Watcher User Guide    
+
+A typical multi-block synchronous read of 64 x 8k blocks (512kB total) should have an average of at most 20 milliseconds before worrying about 'slow IO'.  Smaller requests should be faster (10-20ms) whereas for larger requests, the elapsed time should be no more than 25ms.
+
+Asynchronous operations should be equally as fast as or faster than synchronous.
+Single Block operations should be as fast as or faster than multi-block
+'log file parallel write', 'control file write' and 'direct path writes' waits should be no more than 15ms.
+
+
+Document 1153664.1 Comparing ASM to Filesystem in benchmarks
+
+Detecting and Resolving Locking Conflicts and Ora-00060 errors (Doc ID 15476.1)	To BottomTo Bottom	
+
+
+"latch: cache buffers chains" contention is typically encountered because SQL statements read more buffers than they need to and multiple sessions are waiting to read the same block.
+
+
+In the AWR or Statspack report, if  the  average user calls per commit/rollback  calculated as "user calls/(user commits+user rollbacks)"   is less than 30, then  commits are happening too frequently: 
+
+
+Whenever a statement is parsed Oracle first looks at the statements pointed to by your private session cache - if a sharable version of the statement exists it can be used. This provides a shortcut access to frequently parsed statements that uses less CPU and uses far fewer latch gets than a soft or hard parse.
+
+To get placed in the session cache the same statement has to be parsed 3 times within the same cursor - a pointer to the shared cursor is then added to your session cache. If all session cache cursors are in use then the least recently used entry is discarded.
+
+
+How To Tune PGA_AGGREGATE_TARGET 
+----------------------------------
+
+The first question we will have when we set this parameter is what is the best 
+value for it? 
+
+To determine the appropriate setting for PGA_AGGREGATE_TARGET  parameter we
+recommend to follow the following steps 
+
+1- Make a first estimate for PGA_AGGREGATE_TARGET  based on the following rule 
+
+- For OLTP systems 
+
+   PGA_AGGREGATE_TARGET  = (physical memory * 80%) * 20%
+
+
+- For DSS systems 
+
+   PGA_AGGREGATE_TARGET  = (physical memory * 80%) * 50%
+   
+   
+   
+   You can generate the AWR differences report, passing the DBID, Instance Number, Begin and End Snapshot IDs for the first period and then the second period, e.g.
+
+select * from TABLE(DBMS_WORKLOAD_REPOSITORY.awr_diff_report_html(4034329550,1,8947,8951,
+ 4034329550,1,8971,8975));
+ 
+-- vendo o uso do AWR 
+ SELECT name,
+  detected_usages,
+  currently_used,
+  TO_CHAR(last_sample_date,'DD-MON-YYYY:HH24:MI') last_sample
+FROM dba_feature_usage_statistics
+WHERE name = 'AWR Report' ;
+
+
+- If you see high numbers for I/O related wait events and high average read/write times in the following section:
+        IO Stats > Tablespace IO Stats
+        IO Stats > File IO Stats
+    
+    then you might suspect some issue with the I/O subsystem. This could be because it is performing slowly or perhaps is being over stressed by forces external to the database or possibly by excessive I/O from the database
+
+    
+- awrrpti.sql 
+ Displays statistics for a range of snapshot Ids on a specified database and instance.
+awrddrpt.sql
+ Compares detailed performance attributes and configuration settings between two selected time periods.
+
+
+ 
+How to Read PGA Memory Advisory Section in AWR and Statspack Reports to Tune PGA_AGGREGATE_TARGET (Doc ID 786554.1) To BottomTo Bottom  
+
+
+
+TOP CPU/IO Consuming SQLs ?
+select
+s.SQL_ID,
+sum(CPU_TIME_DELTA),
+sum(DISK_READS_DELTA),
+count(*)
+from
+DBA_HIST_SQLSTAT
+group by
+SQL_ID
+order by
+sum(CPU_TIME_DELTA) desc
+
+
+oratop - utility for near real-time monitoring of databases, RAC and Single Instance [ID 1500864.1]
+
+-- sqls usando temp tbs:
+SELECT a.username, a.sid, a.serial#, a.osuser, b.tablespace, b.blocks, c.sql_text
+FROM v$session a, v$tempseg_usage b, v$sqlarea c
+WHERE a.saddr = b.session_addr
+AND c.address= a.sql_address
+AND c.hash_value = a.sql_hash_value
+ORDER BY b.tablespace, b.blocks;
+
+
+-- restricoes ifb:
+VIII. RESTRICTIONS:
+
+Function-based indexes should reference only columns in a row of a table.  You 
+therefore cannot index:
+a) LOB columns, 
+b) Nested table column
+
+Further,
+c) Aggregate functions are not allowed in the expressions of the index.
+   Example: SUM, AVG, etc.
+d) As you have to generate statistics after creating function based indexes, 
+   it can only be used with Cost Based optimizer. The rule based optimizer 
+   will never use function-based indexes.
+e) Since function cannot return NULL you cannot store null values
+f) The function should return the same value for an input. In other words it 
+   should be deterministic
+g) The index can only be enabled if the signature of the function is same as 
+   before (i.e when it was created). If the signature of the functions changes
+   then the index needs to be revalidated by using the rebuild option: 
+   ALTER INDEX  REBUILD;
+   
+   
+-- deletar linhas duplicadas:
+delete from &&t
+where rowid not in (select min(rowid) from &&t group by &&c)   

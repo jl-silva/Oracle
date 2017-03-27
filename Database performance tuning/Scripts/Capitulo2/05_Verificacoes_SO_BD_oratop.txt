@@ -1,0 +1,7 @@
+Um pouco sobre o ORATOP: Utilitário para monitoramento de bancos de dados Oracle
+
+Leia mais: 
+    - http://eduardolegatti.blogspot.com/2015/12/um-pouco-sobre-o-oratop-utilitario-para.html#ixzz49ibdifVH 
+    - oratop - utility for near real-time monitoring of databases, RAC and Single Instance [ID 1500864.1]
+
+

@@ -1,0 +1,37 @@
+*************************************************
+-- Verificando gargalos de I/O, cpu e memoria atraves do utilitario vmstat
+*************************************************
+
+Utilizar utilitario "vmstat" (nao requer privilegios especiais):
+     vmstat 5 10 
+   
+-- O primeiro valor (5) indica o delay (tempo de atualizacao)
+-- O segundo valor (10) indica o contador (quantidade de repeticoes)
+
+--------------------------------------------------------
+DESCRICAO DAS PRINCIPAIS COLUNAS DE SAIDA DO VMSTAT
+--------------------------------------------------------
+*   r       Numero de processos aguardando execucao
+*   b       Numero de processos nao interrompiveis em espera 
+    swpd    Qtde. de memoria virtual em kb
+    free    Qtde. de memoria livre em kb
+    buff    Qtde. de buffer de memoria em kb
+    cache   Qtde. de cache de memoria em kb
+*   si      Qtde de memoria carregada (in) em swap (disk/second)
+*   so      Qtde de memoria gravada (out) em swap (disk/second)
+    bi      Blocos lidos por segundo 
+    bo      Blocks escritos por segundo 
+    us      Percentual de tempo de cpu usada por processos de usuario
+    sy      Percentual de tempo de cpu usada pelo sistema
+*   id      Percentual de tempo de cpu ociosa
+*   wa      Tempo de cpu esperando por I/O
+--------------------------------------------------------
+
+--------------------------------------------------------
+IDENTIFICANDO PROBLEMAS
+--------------------------------------------------------
+1- o valor de "r" nao pode ser maior que qtde de cpus ou nucleos do servidor
+2- se "b" (processes sleeping) eh consistentemente maior que 0 entao nao ha CPU suficiente para executar todos os processos existentes. 
+3- se "so"  (swap out) and "si" (swap in) sao consistententemente maior que 0, ha pouca memoria
+4- se "id" eh consistentemente igual a 0 entao nao ha CPU suficiente. 
+5- "wa" alto indica contencao de I/O no disco/storage

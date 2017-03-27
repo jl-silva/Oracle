@@ -1,0 +1,20 @@
+Cycle 1 - oratop: Release 14.1.2 Production on Thu Feb 16 13:17:47 2017
+
+Oracle 11g - Primary orcl   13:17:39 up: 0.7h,   1 ins,   10 sn,   1 us, 1.1G mt,    0% fra,   0 er,                       7.3% db
+ID %CPU LOAD %DCU   AAS  ASC  ASI  ASW  ASP  AST  UST MBPS IOPS IORL LOGR PHYR PHYW  %FR   PGA TEMP UTPS UCPS SSRT DCTR DWTR  %DBT
+----------------------------------------------------------------------------------------------------------------------------------
+ 1    3    0    0   0.3    0    0   10    0   10   10    0   11   4m  827   37    0   92   69M    0   12   16   1m   22   77   100
+
+EVENT (C)                                                         TOTAL WAITS   TIME(s)  AVG_MS  PCT                    WAIT_CLASS
+----------------------------------------------------------------------------------------------------------------------------------
+db file sequential read                                                 35592       751    21.1   71                      User I/O
+log file sync                                                            3794       110    29.2   10                        Commit
+log file parallel write                                                 23232        87     3.7    8                    System I/O
+db file scattered read                                                   3808        56    14.9    5                      User I/O
+DB CPU                                                                               55            5                              
+
+ID   SID     SPID USERNAME  PROGRAM    SRV  SERVICE  PGA  SQLID/BLOCKER OPN  E/T  STA  STE  WAIT_CLASS  EVENT/*LATCH           W/T
+----------------------------------------------------------------------------------------------------------------------------------
+ 1   192     4259 SOE       JDBC Thin  DED  orcl    1.5M  0yas01u2p9ch4 INS 1.0s  ACT  I/O  User I/O    db file sequential re  10m
+ 1   197     4320 SYS       oratop@fa  DED  SYS$USE 2.8M  7qj5jsdnpsn1a SEL    0  ACT  CPU  Other       cpu runqueue            2u
+
